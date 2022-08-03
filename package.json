@@ -1,0 +1,16 @@
+{
+  "name": "mekagojira",
+  "version": "1.0.1",
+  "description": "JIRA boards in a chrome extension",
+  "keywords": [
+    "chrome",
+    "extension",
+    "jira"
+  ],
+  "author": "natedsaint@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
+}

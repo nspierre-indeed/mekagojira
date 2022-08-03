@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Mekagojira Extension",
+  "description": "Extension to view your own tasks",
+  "version": "2.0",
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*/"
+  ],
+  "options_page" : "options.html",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "32": "img/jira_logo_512px.png"
+    }
+  },
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "icons": {
+    "256": "img/jira_logo_512px.png"
+  }
+}
