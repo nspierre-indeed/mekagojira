@@ -33,6 +33,11 @@ class MekaNav extends HTMLElement {
         nav .right {
           float:right;
         }
+
+        :host div {
+          margin-top:35px;
+        }
+       
       </style>
       <nav>
         <a target="_blank" class="right" href="options.html">Configure</a>

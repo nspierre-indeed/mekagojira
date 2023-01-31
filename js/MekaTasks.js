@@ -28,6 +28,7 @@ class MekaTasks extends HTMLElement {
             }
         }
         </style>
+        <h3>Tasks</h3>
         ${tasks.map(task => `<a target="_blank" href="${jiraPath}/browse/${task.key}">
           ${task.key} - ${task.fields.summary}</a><br>
         `).join('')}

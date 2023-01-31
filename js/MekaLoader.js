@@ -93,7 +93,7 @@ class MekaLoader extends HTMLElement {
         </figcaption>
       </figure>`;
       wrapper.innerHTML = template;
-      this.shadowRoot.appendChild(wrapper);
+      this.shadowRoot?.appendChild(wrapper);
   }
   
 }

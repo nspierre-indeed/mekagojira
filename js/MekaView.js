@@ -37,13 +37,14 @@ class MekaView  extends HTMLElement {
         }
         article {
           z-index:10;
-          padding:5px 5px 20px 5px;
+          padding:5px;
         }
       </style>
       
       <article>
         <meka-loader></meka-loader>
         <meka-tasks></meka-tasks>
+        <meka-boards></meka-boards>
       </article>
       <meka-nav></meka-nav>
     `;
@@ -67,7 +68,7 @@ class MekaView  extends HTMLElement {
 
   init() {
     const me = this;
-    chrome.storage.sync.get({popupQuery:me.defaultQuery, jiraPath:''}, (result) => {
+    chrome.storage.sync.get({popupQuery:me.defaultQuery, jiraPath:'', savedBoards: []}, (result) => {
       const { jiraPath } = result;
       if (!jiraPath) {
         chrome.tabs.create({
@@ -79,10 +80,13 @@ class MekaView  extends HTMLElement {
       me.jiraPath = jiraPath;
       me.query = result.popupQuery || me.defaultQuery;
       me.fetchData();
+      if (result.savedBoards) {
+        me.shadowRoot.querySelector('meka-boards').boards = result.savedBoards;
+      }
     });
 
     chrome.storage.onChanged.addListener((changes) => {
-      const { jiraPath, query, displayData } = changes;
+      const { jiraPath, query, displayData, savedBoards } = changes;
       if (displayData) {
         me.updateData(displayData.newValue);
       }
@@ -90,6 +94,9 @@ class MekaView  extends HTMLElement {
       me.query = query || me.query;
       if (jiraPath || query) {
         me.fetchData();
+      }
+      if (savedBoards) {
+        me.shadowRoot.querySelector('meka-boards').boards = rsavedBoards;
       }
     });
   }
