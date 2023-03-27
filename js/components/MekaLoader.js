@@ -1,4 +1,6 @@
-class MekaLoader extends HTMLElement {
+import MekaPonent from "./MekaPonent.js";
+
+class MekaLoader extends MekaPonent {
   static get observedAttributes() {
     return ['done'];
   }
@@ -26,8 +28,7 @@ class MekaLoader extends HTMLElement {
   constructor() {
     super();
     const wrapper = document.createElement('div');
-    const shadow = this.attachShadow({ mode: 'open'});
-    const template = `
+    const template = /* html */ `
       <style>
         :host {
           position: fixed;

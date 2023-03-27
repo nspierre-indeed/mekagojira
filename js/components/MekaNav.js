@@ -1,10 +1,11 @@
-class MekaNav extends HTMLElement {
+import MekaPonent from "./MekaPonent.js";
+
+class MekaNav extends MekaPonent {
   constructor() {
     super();
     const me = this;
-    const shadow = me.attachShadow({ mode: 'open'});
     const wrapper = document.createElement('div');
-    this.template = `
+    this.template = /*html */ `
       <style>
         /* Light mode */
         @media (prefers-color-scheme: light) {
@@ -33,6 +34,11 @@ class MekaNav extends HTMLElement {
         nav .right {
           float:right;
         }
+
+        :host div {
+          margin-top:35px;
+        }
+       
       </style>
       <nav>
         <a target="_blank" class="right" href="options.html">Configure</a>
