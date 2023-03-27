@@ -1,4 +1,6 @@
-class MekaView  extends HTMLElement {
+import MekaPonent from './MekaPonent.js';
+
+class MekaView  extends MekaPonent {
   static get observedAttributes() {
     return ['loading'];
   }
@@ -12,11 +14,11 @@ class MekaView  extends HTMLElement {
       this.removeAttribute('loading');
     }
   }
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(_name, _oldValue, _newValue) {
     if (this.loading) {
-      this.shadowRoot.querySelector('meka-loader').done = false;
+      super.query('meka-loader').done = false;
     } else {
-      this.shadowRoot.querySelector('meka-loader').done = true;
+      super.query('meka-loader').done = true;
     }
   }
   constructor() {
@@ -24,9 +26,8 @@ class MekaView  extends HTMLElement {
     const me = this;
     me.loading = true;
     me.defaultQuery = 'assignee%3DCurrentUser()%20and%20resolution%20=%20Unresolved';
-    const shadow = me.attachShadow({ mode: 'open'});
     const wrapper = document.createElement('div');
-    const template = `
+    const template = /* html */`
       <style>
         :host {
           font-family:"Segoe UI", Roboto, sans-serif;
@@ -55,13 +56,13 @@ class MekaView  extends HTMLElement {
 
   async fetchData() {
     const me = this;
-    chrome.runtime.sendMessage({operation: 'fetchData', data: { query: me.query, jiraPath: me.jiraPath }});
+    chrome.runtime.sendMessage({operation: 'fetchData', data: { popupQuery: me.query, jiraPath: me.jiraPath }});
   }
 
   updateData(data) {
     const me = this;
     if (data.issues) {
-      me.shadowRoot.querySelector('meka-tasks').tasks = data.issues;
+      super.query('meka-tasks').tasks = data.issues;
       me.loading = false;
     }
   }
@@ -81,7 +82,7 @@ class MekaView  extends HTMLElement {
       me.query = result.popupQuery || me.defaultQuery;
       me.fetchData();
       if (result.savedBoards) {
-        me.shadowRoot.querySelector('meka-boards').boards = result.savedBoards;
+        super.query('meka-boards').boards = result.savedBoards;
       }
     });
 
@@ -96,7 +97,7 @@ class MekaView  extends HTMLElement {
         me.fetchData();
       }
       if (savedBoards) {
-        me.shadowRoot.querySelector('meka-boards').boards = rsavedBoards;
+        super.query('meka-boards').boards = savedBoards;
       }
     });
   }

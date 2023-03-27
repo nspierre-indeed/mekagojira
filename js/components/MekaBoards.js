@@ -1,4 +1,6 @@
-class MekaBoards extends HTMLElement {
+import MekaPonent from "./MekaPonent.js";
+
+class MekaBoards extends MekaPonent {
     set boards(value) {
       this.render(value);
     }
@@ -10,10 +12,10 @@ class MekaBoards extends HTMLElement {
         chrome.storage.sync.get({jiraPath: null}, (response) => {
             const { jiraPath } = response;
             if (!jiraPath) {
-            return;
+                return;
             }
     
-            this.shadowRoot.querySelector('div').innerHTML = `
+            super.query('div').innerHTML = /* html */ `
             <style>
             :host {
                 display: block;
@@ -43,7 +45,6 @@ class MekaBoards extends HTMLElement {
     constructor() {
         super();
         const me = this;
-        me.attachShadow({ mode: 'open'});
         const wrapper = document.createElement('div');
         me.shadowRoot.appendChild(wrapper);
     }

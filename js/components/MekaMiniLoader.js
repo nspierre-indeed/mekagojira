@@ -27,7 +27,7 @@ class MekaMiniLoader extends HTMLElement {
     super();
     const wrapper = document.createElement('div');
     const shadow = this.attachShadow({ mode: 'open'});
-    const template = `
+    const template = /* html */`
       <style>
       :host {
         border: 4px solid #f3f3f3; /* Light grey */
@@ -46,24 +46,10 @@ class MekaMiniLoader extends HTMLElement {
         100% { transform: rotate(360deg); }
       }
       
-        :host(.done) {
-            opacity:0; 
-            transition: opacity 0.5s;
-        }
-      
-
-      // /* Light mode */
-      // @media (prefers-color-scheme: light) {
-      //   :host {
-      //       border: #33333;
-      //     }
-      // }
-      // /* Dark mode */
-      // @media (prefers-color-scheme: dark) {
-      //     :host {
-      //       border: #f3f3f3;
-      //     }
-      // }
+      :host(.done) {
+          opacity:0; 
+          transition: opacity 0.5s;
+      }
 
       </style>
       <figure class="loadingContainer">

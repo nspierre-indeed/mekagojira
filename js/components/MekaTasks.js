@@ -1,4 +1,6 @@
-class MekaTasks extends HTMLElement {
+import MekaPonent from "./MekaPonent.js";
+
+class MekaTasks extends MekaPonent {
   // TODO: look into how best to handle attributes / properties in customElements
   // you cannot use objects/vectors as attributes, only strings or numbers (limited type scalars)
   // Not sure if this is the right way to be using these but it works for now.
@@ -13,7 +15,7 @@ class MekaTasks extends HTMLElement {
         return;
       }
 
-      this.shadowRoot.querySelector('div').innerHTML = `
+      this.shadowRoot.querySelector('div').innerHTML = /* html */`
         <style>
         /* Light mode */
         @media (prefers-color-scheme: light) {
@@ -38,7 +40,6 @@ class MekaTasks extends HTMLElement {
   constructor() {
     super();
     const me = this;
-    me.attachShadow({ mode: 'open'});
     const wrapper = document.createElement('div');
     me.shadowRoot.appendChild(wrapper);
   }

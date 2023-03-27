@@ -1,12 +1,12 @@
+import MekaPonent from "./MekaPonent.js";
 
-// TODO: clean up logic around fetching and rendering: do both from a parent method instead of chaining it
-class MekaOptions extends HTMLElement {
+// TODO: create individual components for each option, and have them sync their own state / update their own views to simplify this 
+class MekaOptions extends MekaPonent {
   constructor() {
     super();
     let me = this;
-    this.attachShadow({ mode: 'open'});
     const wrapper = document.createElement('div');
-    const template = `
+    const template = /* html */ `
       <style>
         form {
           max-width:1000px;
@@ -47,11 +47,11 @@ class MekaOptions extends HTMLElement {
         }
       </style>
       <form method="get" action="">
-        <div class="formGroup">
-          <label for="popupQuery">Popup Query</label>
-          <input type="text" id="popupQuery" name="popupQuery" placeholder="Insert JQL or choose filter" />
-          <em>(leave blank for default of all your assigned unresolved issues)</em>
-        </div>
+        <meka-option option="jiraPath"></meka-option>
+        <meka-option option="refreshInterval"></meka-option>
+        <meka-option option="popupQuery"></meka-option>
+        <meka-option option="savedFilters"></meka-option>
+        <!-- the filters one and agile boards are complex, may need their own sub-component of meka-option -->
         <div class="formGroup">
           <label for="savedFilters">Saved Filters</label>
           <input list="filters" id="savedFilters" placeholder="Pick Filter or leave blank">
@@ -65,11 +65,7 @@ class MekaOptions extends HTMLElement {
           </datalist>
           <div id="savedBoards"></div>
         </div>
-        <div class="formGroup">
-          <label for="jiraPath">Jira Path</label>
-          <input type="text" id="jiraPath" name="jiraPath" />
-          <em>(e.g. https://jira.domain.com/ or https://our.domain.com/jira/)</em>
-        </div>
+        
         <div class="formGroup" id="message">
 
         </div>
@@ -83,36 +79,29 @@ class MekaOptions extends HTMLElement {
 
     me.loadFormData();
   
-    me.shadowRoot.getElementById("saveSettingButton").addEventListener("click",() => {
-      chrome.storage.sync.set({
-        'popupQuery':me.shadowRoot.getElementById('popupQuery').value,
-        'jiraPath': me.shadowRoot.getElementById('jiraPath').value.replace(/\/+$/, ''),
+    super.query("#saveSettingButton").addEventListener('click', () => {
+      const values = {
+        'popupQuery':super.query('meka-option[option="popupQuery"]').getAttribute('value'),
+        'jiraPath': super.query('meka-option[option="jiraPath"]').getAttribute('value').replace(/\/+$/, ''),
+        'refreshInterval': parseFloat(super.query('meka-option[option="refreshInterval"]').getAttribute('value')),
         'savedBoards': me.savedBoards
-      },() => {
+      };
+      chrome.storage.sync.set(values, (vals) => {
         me.loadFormData();
-        this.shadowRoot.getElementById('message').innerHTML = 'Options saved at ' + new Date();
+        super.query('#message').innerHTML = 'Options saved at ' + new Date();
       });
     });
   }
 
   loadFormData() {
     const me = this;
-    chrome.storage.sync.get({popupQuery:'', jiraPath: '', savedBoards: []}, (result) => {
-      if (result.popupQuery) {
-        me.shadowRoot.getElementById('popupQuery').value = result.popupQuery;
-      }
-      if (result.jiraPath) {
-        me.shadowRoot.getElementById('jiraPath').value = result.jiraPath;
-      } else {
-        me.shadowRoot.getElementById('message').innerHTML = 'Jira Path is reqired!';
-        me.shadowRoot.getElementById('message').style.color = '#f00';
-      }
+    chrome.storage.sync.get({savedBoards: []}, (result) => {
       if (result.savedBoards) {
         me.savedBoards = result.savedBoards;
         me.renderSavedBoards();
       }
       me.getFilters();
-      me.bindBoardInput(me.shadowRoot.getElementById('boardInput'));
+      me.bindBoardInput(super.query('#boardInput'));
     });
   }
 
@@ -139,9 +128,9 @@ class MekaOptions extends HTMLElement {
 
   renderFilters(filterData) {
     const me = this;
-    const filters = me.shadowRoot.getElementById('filters');
-    const savedFilters = me.shadowRoot.getElementById('savedFilters');
-    const popupQuery = me.shadowRoot.getElementById('popupQuery');
+    const filters = super.query('#filters');
+    const savedFilters = super.query('#savedFilters');
+    const popupQuery = super.query('meka-option[option="popupQuery"]');
     let filterHtml = '<option value="">- - -</option>';
 
     me.savedFilters = filterData;
@@ -163,7 +152,7 @@ class MekaOptions extends HTMLElement {
 
   renderBoards(boardData) {
     const me = this;
-    const boards = me.shadowRoot.getElementById('boards');
+    const boards = super.query('#boards');
     let boardHtml = '<option value="">- - -</option>';
 
     me.boardsList = boardData;
@@ -177,7 +166,7 @@ class MekaOptions extends HTMLElement {
     const me = this;
     let loadingBoards = false;
     let cachedTimeout;
-    me.shadowRoot.querySelector('meka-mini-loader').done = true;
+    super.query('meka-mini-loader').done = true;
     boardInput.addEventListener('input', async (event) => {
       if (cachedTimeout) {
         clearTimeout(cachedTimeout);
@@ -190,13 +179,13 @@ class MekaOptions extends HTMLElement {
         }
         me.boardName = search;
         loadingBoards = true;
-        me.shadowRoot.querySelector('meka-mini-loader').done = false;
+        super.query('meka-mini-loader').done = false;
         const boards = await me.getBoards();
         const currentSavedIds = me.savedBoards.map(board => board.id);
         const filteredBoards = boards.filter((board) => { return (!currentSavedIds.includes(board.id))});
         me.renderBoards(filteredBoards);
         loadingBoards = false;
-        me.shadowRoot.querySelector('meka-mini-loader').done = true;
+        super.query('meka-mini-loader').done = true;
       }, 300);
     });
 
@@ -220,8 +209,8 @@ class MekaOptions extends HTMLElement {
     me.savedBoards.forEach((board) => {
       boardHtml += `<div>${board.name} (${board.id})<button type="button" class="remove" data-boardid="${board.id}">x</button></div>`;
     });
-    me.shadowRoot.getElementById('savedBoards').innerHTML = boardHtml;
-    me.shadowRoot.querySelectorAll('.remove').forEach((button) => {
+    super.query('#savedBoards').innerHTML = boardHtml;
+    super.queryAll('.remove').forEach((button) => {
       button.addEventListener('click', (event) => {
         me.savedBoards = me.savedBoards.filter((board) => {
           return board.id !== parseInt(event.target.dataset.boardid, 10);
