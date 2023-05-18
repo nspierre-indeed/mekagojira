@@ -15,10 +15,6 @@ chrome.storage.onChanged.addListener((changes) => {
         chrome.alarms.create('fetchData', {delayInMinutes: 0.1, periodInMinutes: refreshInterval.newValue});
     }
 });
-/* 
-TODO: 
-- make the periodInMinutes above configurable via settings
-*/
 
 chrome.alarms.onAlarm.addListener(async (_alarm) => {
     chrome.storage.sync.get({popupQuery:defaultQuery, jiraPath:''}, async (settings) => {
@@ -43,13 +39,15 @@ const handleFetch = async (data) => {
     try {
         const displayData = await fetchData(path);
         chrome.storage.local.set({ displayData });
+        chrome.storage.sync.set({ errorMessage: ''});
     } catch (e) {
         if (e.message === "401") {
-            console.warn('error: need to log in');
+            console.warn('error: session timed out');
             chrome.tabs.create({
                 url: `${jiraPath}/login.jsp`
             });
         } else if (e.message === "400") {
+            chrome.storage.sync.set({ errorMessage: 'Invalid request: you may need to fix your popupquery, or if it uses currentUser() log in first'});
             console.warn('invalid request, likely need to fix query');
         }
     }
@@ -62,9 +60,13 @@ const fetchData = async (path) => {
         return;
     }
     isFetching = true;
+    chrome.action.setBadgeBackgroundColor({ color: 'rgb(133,172,243)' })
     chrome.action.setBadgeText({text: '...'});
     const response = await fetch(path);
     if (response.status !== 200) {
+        chrome.action.setBadgeBackgroundColor({ color: 'rgb(243,133,172)' });
+        chrome.action.setBadgeText({text: '!'});
+        isFetching = false;
         throw new Error(response.status.toString());
     }
     const responseText = await (response.text());

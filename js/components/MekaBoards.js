@@ -32,12 +32,19 @@ class MekaBoards extends MekaPonent {
                     color: #eaeaea;
                 }
             }
+            a img {
+                vertical-align:middle;
+            }
+            a:hover img {
+                filter: brightness(0.5);
+            }
             </style>
             <h3>Boards</h3>
             <meka-boards></meka-boards>
 
-            ${boards.map(board => `<a target="_blank" href="${jiraPath}/secure/RapidBoard.jspa?rapidView=${board.id}">
-                ${board.name} (${board.id})</a><br>
+            ${boards.map(board => /* html */ `
+            <a target="_blank" href="${jiraPath}/secure/RapidBoard.jspa?rapidView=${board.id}">
+                ${board.name} (${board.id})</a> <a target="blank" href="board_view.html?id=${board.id}&name=${board.name}"><img src="img/eye-svgrepo-com.svg" width="20" height="20" /></a> <br>
             `).join('')}
             `;
         });

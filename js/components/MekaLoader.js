@@ -16,6 +16,7 @@ class MekaLoader extends MekaPonent {
       this.removeAttribute('done');
     }
   }
+  
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (this.done) {
@@ -25,10 +26,64 @@ class MekaLoader extends MekaPonent {
     }
   }
 
-  constructor() {
-    super();
-    const wrapper = document.createElement('div');
-    const template = /* html */ `
+  getStyle() {
+    if (this.getAttribute('variant') === 'pixel') {
+      return this.getPixelStyle();
+    }
+    return this.getStandardStyle();
+  }
+
+  getPixelStyle() {
+    return /* html */ `
+    <style>
+      :host {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index:20;
+        opacity:1;
+        padding:30px;
+        border: solid 2px #eaeaea;
+        background: rgba(0,0,0,0.2);
+        margin:0;
+      }
+    
+      :host(.done) {
+        opacity:0;
+        pointer-events: none;
+      }
+    
+      :host .dot {
+        width: 30px;
+        height: 30px;
+        float: left;
+        margin: 0 5px;
+        transform: scale(0);
+        animation: fx 1000ms ease 0ms infinite;
+        background-color: #eaeaea;
+      }
+      :host  .dot:nth-child(2) {
+        animation: fx 1000ms ease 300ms infinite;
+      }
+      :host .dot:nth-child(3) {
+        animation: fx 1000ms ease 600ms infinite;
+      }
+
+    @keyframes fx {
+      50% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+    </style>`;
+  }
+
+  getStandardStyle() {
+    return /* html */ `
       <style>
         :host {
           position: fixed;
@@ -44,6 +99,7 @@ class MekaLoader extends MekaPonent {
       
         :host(.done) {
           opacity:0;
+          pointer-events:none;
         }
       
         :host .dot {
@@ -53,16 +109,15 @@ class MekaLoader extends MekaPonent {
           border-radius: 50%;
           float: left;
           margin: 0 5px;
-            transform: scale(0);
-                  animation: fx 1000ms ease 0ms infinite;
+          transform: scale(0);
+          animation: fx 1000ms ease 0ms infinite;
         }
         :host  .dot:nth-child(2) {
-                  animation: fx 1000ms ease 300ms infinite;
+          animation: fx 1000ms ease 300ms infinite;
         }
         :host .dot:nth-child(3) {
-                  animation: fx 1000ms ease 600ms infinite;
+          animation: fx 1000ms ease 600ms infinite;
         }
-      }
 
       /* Light mode */
       @media (prefers-color-scheme: light) {
@@ -86,6 +141,14 @@ class MekaLoader extends MekaPonent {
         }
       }
       </style>
+    `;
+  }
+
+  constructor() {
+    super();
+    const wrapper = document.createElement('div');
+    const template = /* html */ `
+      ${this.getStyle()}
       <figure class="loadingContainer">
         <figcaption>
           <div class="dot"></div>

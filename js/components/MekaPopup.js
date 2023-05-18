@@ -1,6 +1,6 @@
 import MekaPonent from './MekaPonent.js';
 
-class MekaView  extends MekaPonent {
+class MekaPopup  extends MekaPonent {
   static get observedAttributes() {
     return ['loading'];
   }
@@ -46,6 +46,7 @@ class MekaView  extends MekaPonent {
         <meka-loader></meka-loader>
         <meka-tasks></meka-tasks>
         <meka-boards></meka-boards>
+        <meka-error></meka-error>
       </article>
       <meka-nav></meka-nav>
     `;
@@ -103,4 +104,4 @@ class MekaView  extends MekaPonent {
   }
 }
 
-export default MekaView;
+export default MekaPopup;

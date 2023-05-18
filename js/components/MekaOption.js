@@ -49,20 +49,20 @@ class MekaOption extends MekaPonent {
         const baseTemplate = /* html */ `
         <style>
             .formGroup {
-            display:block;
-            padding:20px;
-            margin:10px;
-            background:#eee;
+                display:block;
+                padding:20px;
+                margin:10px;
+                background:#eee;
             }
         
             .formGroup label {
-            width:100px;
-            display:inline-block;
+                width:100px;
+                display:inline-block;
             }
         
             .formGroup input, .formGroup select {
-            padding:5px;
-            width:250px;
+                padding:5px;
+                width:250px;
             }
             .formGroup textarea {
                 width:250px;
