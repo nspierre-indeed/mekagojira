@@ -1,4 +1,4 @@
-import MekaPonent from "./MekaPonent.js";
+import MekaPonent from "../MekaPonent.js";
 
 class MekaOption extends MekaPonent {
     static get observedAttributes() {

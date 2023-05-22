@@ -1,4 +1,4 @@
-import MekaPonent from "./MekaPonent.js";
+import MekaPonent from "../MekaPonent.js";
 
 class MekaNav extends MekaPonent {
   constructor() {

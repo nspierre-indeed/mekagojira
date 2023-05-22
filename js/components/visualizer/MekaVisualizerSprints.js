@@ -1,5 +1,5 @@
-import Utils from '../utils.js';
-import MekaPonent from './MekaPonent.js';
+import Utils from '../../utils.js';
+import MekaPonent from '../MekaPonent.js';
 
 class MekaVisualizerSprints extends MekaPonent {
     constructor() {

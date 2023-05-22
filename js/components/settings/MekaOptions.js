@@ -1,4 +1,4 @@
-import MekaPonent from "./MekaPonent.js";
+import MekaPonent from "../MekaPonent.js";
 
 // TODO: create individual components for each option, and have them sync their own state / update their own views to simplify this 
 class MekaOptions extends MekaPonent {

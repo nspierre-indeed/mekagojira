@@ -1,4 +1,4 @@
-import MekaPonent from "./MekaPonent.js";
+import MekaPonent from "../MekaPonent.js";
 
 class MekaTasks extends MekaPonent {
   // TODO: look into how best to handle attributes / properties in customElements
