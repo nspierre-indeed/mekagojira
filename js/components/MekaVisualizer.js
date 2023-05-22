@@ -44,8 +44,13 @@ class MekaVisualizer extends MekaPonent {
         `;
         this.wrapper.innerHTML = this.template;
         this.query('meka-visualizer-variants').addEventListener('updateVariant', (event) => {
+            if (this.variant && event.target.getAttribute('variant') === this.variant) {
+                return false;
+            }
             this.variant = event.target.getAttribute('variant');
-            this.reload();
+            if (this.sprint) {
+                this.reload();
+            }
         });
         this.query('meka-visualizer-sprints').addEventListener('updateSprint', async (event) => {
             const targetSprint = event.target.getAttribute('sprint');
@@ -76,20 +81,16 @@ class MekaVisualizer extends MekaPonent {
                     font-family:Pixel;
                     background: url('img/pixel_bg.webp') fixed bottom repeat-x rgba(171, 146, 204);
                 }
-                /* Light mode */
-                @media (prefers-color-scheme: light) {
-                    .column {
-                        background-color: #eaeaea;
-                        color: #222;
-                    }
+
+                .column {
+                    background-color: #000;
+                    color: #eaeaea;
                 }
-                /* Dark mode */
-                @media (prefers-color-scheme: dark) {
-                    .column {
-                        background-color: #000;
-                        color: #eaeaea;
-                    }
+                nav {
+                    z-index: 100;
+                    position: relative;
                 }
+
                 h1 {
                     position: absolute;
                     top: 0;
@@ -100,6 +101,7 @@ class MekaVisualizer extends MekaPonent {
                     font-size: 42px;
                     color: #eaeaea;
                     z-index: 1;
+                    pointer-events:none;
                 }
                 .columns {
                     display:flex;
@@ -225,8 +227,17 @@ class MekaVisualizer extends MekaPonent {
                     .column {
                         background-color: #eaeaea;
                     }
+                    .column a {
+                        color: #222;
+                    }
                     .mainWrapper {
                         color: #222;
+                    }
+                    h1 {
+                        color: #eee;
+                    }
+                    .column .issue {
+                        border-color: #333;
                     }
                 }
                 /* Dark mode */

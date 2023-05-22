@@ -9,7 +9,15 @@ class MekaVisualizerVariants extends MekaPonent {
         return ['variant'];
     }
     attributeChangedCallback(name, oldValue, newValue) {
-        this.dispatchEvent(new CustomEvent('updateVariant', {bubbles: true, cancelable: false, composed: true}));
+        if (oldValue !== newValue) {
+            this.dispatchEvent(new CustomEvent('updateVariant', {bubbles: true, cancelable: false, composed: true}));
+        }
+    }
+    async connectedCallback() {
+        const variant = await this.getSetting('variant');
+        if (variant) {
+            this.setAttribute('variant', variant);
+        }
     }
 
     render() {
@@ -30,6 +38,7 @@ class MekaVisualizerVariants extends MekaPonent {
         wrapper.innerHTML = template;
         this.shadowRoot.addEventListener("change", (event) => {
             this.setAttribute('variant', event.target.value);
+            this.setSetting('variant', event.target.value);
         });
         this.shadowRoot.appendChild(wrapper);
     }

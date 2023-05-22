@@ -25,18 +25,30 @@ class MekaBoards extends MekaPonent {
                 a {
                     color: #222;
                 }
+                .expand {
+                    background:url(img/black_eye.svg);
+                }
             }
             /* Dark mode */
             @media (prefers-color-scheme: dark) {
                 a {
                     color: #eaeaea;
                 }
+                .expand {
+                    background:url(img/white_eye.svg);
+                }
             }
-            a img {
-                vertical-align:middle;
-            }
+
             a:hover img {
                 filter: brightness(0.5);
+            }
+            .expand {
+                width: 20px;
+                height: 20px;
+                vertical-align:middle;
+                margin-left:4px;
+                display:inline-block;
+                background-size: 20px 20px;
             }
             </style>
             <h3>Boards</h3>
@@ -44,7 +56,7 @@ class MekaBoards extends MekaPonent {
 
             ${boards.map(board => /* html */ `
             <a target="_blank" href="${jiraPath}/secure/RapidBoard.jspa?rapidView=${board.id}">
-                ${board.name} (${board.id})</a> <a target="blank" href="board_view.html?id=${board.id}&name=${board.name}"><img src="img/eye-svgrepo-com.svg" width="20" height="20" /></a> <br>
+                ${board.name} (${board.id})</a> <a target="blank" href="board_view.html?id=${board.id}&name=${board.name}"><span class="expand"><span></a> <br>
             `).join('')}
             `;
         });

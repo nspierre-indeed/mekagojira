@@ -23,11 +23,17 @@ class MekaVisualizerSprints extends MekaPonent {
     }
     
     attributeChangedCallback(name, oldValue, newValue) {
-        this.dispatchEvent(new CustomEvent('updateSprint', {bubbles: true, cancelable: false, composed: true}));
+        if (oldValue !== newValue) {
+            this.dispatchEvent(new CustomEvent('updateSprint', {bubbles: true, cancelable: false, composed: true}));
+        }
     }
 
     async load() {
         const sprints = await this.getSprints();
+        const sprint = await this.getSetting('sprint');
+        if (sprint) {
+            this.setAttribute('sprint', sprint);
+        }
         this.render(sprints.values);
     }
 
@@ -55,6 +61,7 @@ class MekaVisualizerSprints extends MekaPonent {
         this.wrapper.innerHTML = template;
         this.shadowRoot.addEventListener("change", (event) => {
             this.setAttribute('sprint', event.target.value);
+            this.setSetting('sprint', event.target.value);
         });
         this.shadowRoot.appendChild(this.wrapper);
     }

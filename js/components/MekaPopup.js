@@ -38,7 +38,7 @@ class MekaPopup  extends MekaPonent {
         }
         article {
           z-index:10;
-          padding:5px;
+          padding:5px 5px 20px 5px;
         }
       </style>
       
