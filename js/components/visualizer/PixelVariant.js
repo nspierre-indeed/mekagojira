@@ -1,5 +1,9 @@
 import VisualizerVariant from './VisualizerVariant.js';
 
+const pattern = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let current = 0;
+let variantShadowDom = null;
+
 class PixelVariant extends VisualizerVariant {
     static getStyles() {
         return /* html */`
@@ -12,6 +16,7 @@ class PixelVariant extends VisualizerVariant {
                 .column {
                     background-color: #000;
                     color: #eaeaea;
+                    position: relative;
                 }
                 nav {
                     z-index: 100;
@@ -45,6 +50,7 @@ class PixelVariant extends VisualizerVariant {
                     text-align:center;
                 }
                 .column h2 {
+                    z-index: 3;
                     text-align:center;
                     border: solid 1px;
                     width: auto;
@@ -133,6 +139,36 @@ class PixelVariant extends VisualizerVariant {
                 .points-8 .pip {
                     background: #f99;
                 }
+                .missileTower {
+                    width: 10px;
+                    height: 80px;
+                    background-color: #333;
+                    position: absolute;
+                    top: -100px;
+                    left: 50%;
+                    margin-left: -5px;
+                    border: solid 2px #fff;
+                    z-index:1;
+                    animation: loadup linear 1.5s;
+                    transition: background-color 0.2s;
+                }
+                .missileTower.closest {
+                    background-color: #aeaeae;
+                }
+                .missileTower.fired {
+                    background-color: #f00;
+                    transition: background-color 0.2s;
+                }
+                @keyframes loadup {
+                    from {
+                        top: -30px;
+                        height: 0;
+                    }
+                    to {
+                        top: -100px;
+                        height: 70px;
+                    }
+                }
                 
             </style>
         `;
@@ -160,6 +196,100 @@ class PixelVariant extends VisualizerVariant {
             </div>
         `;
     }
+    static renderColumns(columns, path, storyField) {
+        return columns.map(([columnName, issues]) => {
+            return this.renderColumn(columnName, issues, path, storyField);
+        }).join("");
+    }
+    static renderColumn(name, issues, path, storyField) {
+        const initialValue = 0;
+        const pointCount = issues.reduce((prev, current) => {
+            return prev + current?.fields[storyField];
+        }, initialValue);
+        return /* html */ `
+            <section class="column">
+                <h2>${name} [${pointCount}]</h2>
+                ${issues.map((issue) => (this.renderIssue(issue, path, storyField))).join("")}
+            </section>`
+    }
+    static renderSprintDetails(sprintData, path, storyField) {
+        if (!sprintData) {
+            return '';
+        } else {
+            return this.renderColumns(Object.entries(sprintData), path, storyField)
+        }
+    }
+    static onLoad(shadowDom) {
+        variantShadowDom = shadowDom;
+        // Listen for keydown events
+        document.addEventListener('keydown', this.keyHandler, false);
+    }
+    static unLoad() {
+        variantShadowDom = null;
+        document.removeEventListener('keydown', this.keyHandler);
+    }
+    static startGame() {
+        const columns = variantShadowDom.querySelectorAll('section.column');
+        let closest;
+        const makeTower = () => {
+            const tower = document.createElement('div');
+            tower.className = 'missileTower';
+            return tower;
+        }
+        const towers = [];
+        columns.forEach((column) => {
+            const tower = makeTower();
+            towers.push(tower);
+            column.appendChild(tower);
+        });
+        document.addEventListener('mousemove', e => {
+            closest = towers[0];
+            towers.forEach((tower) => {
+                tower.classList.remove('closest');
+                const towerBoundingRect = tower.getBoundingClientRect();
+                const towerCenter = {
+                    x: towerBoundingRect.left + towerBoundingRect.width / 2,
+                    y: towerBoundingRect.top + towerBoundingRect.width / 2
+                }
+                let angle = Math.atan2(e.pageX - towerCenter.x, - (e.pageY - towerCenter.y) )*(180 / Math.PI);
+                let distanceX = Math.abs(e.pageX - towerCenter.x);
+                if (distanceX < Math.abs(e.pageX - closest.getBoundingClientRect().x)) {
+                    closest = tower;
+                }
+                tower.style.transform = `rotate(${angle}deg)`;
+                tower.dataset.angle = angle;
+            });
+            closest.classList.add('closest');
+        });
+        document.addEventListener('mouseup', e => {
+            const target = closest;
+            if (target.classList.contains('fired')) {
+                return false;
+            }
+            target.classList.add('fired');
+            window.setTimeout(() => {
+                target.classList.remove('fired');
+            }, 1000);
+        });
+    }
+    static keyHandler(event) {
+
+        // If the key isn't in the pattern, or isn't the current key in the pattern, reset
+        if (pattern.indexOf(event.key) < 0 || event.key !== pattern[current]) {
+            current = 0;
+            return;
+        }
+
+        // Update how much of the pattern is complete
+        current++;
+
+        // If complete, alert and reset
+        if (pattern.length === current) {
+            current = 0;
+            PixelVariant.startGame();
+        }
+
+    };
 }
 
 export default PixelVariant;

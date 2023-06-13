@@ -130,6 +130,13 @@ class VisualizerVariant {
             </style>
         `;
     }
+    static renderSprintDetails(sprintData, path, storyField) {
+        if (!sprintData) {
+            return '';
+        } else {
+            return this.renderColumns(Object.entries(sprintData), path, storyField)
+        }
+    }
     static renderIssue(issue, path, storyField) {
         const storyPoints = issue.fields[storyField];
         return /* html */ `
@@ -144,6 +151,28 @@ class VisualizerVariant {
             </a>
         </div>
     `;
+    }
+    static renderColumns(columns, path, storyField) {
+        return columns.map(([columnName, issues]) => {
+            return this.renderColumn(columnName, issues, path, storyField);
+        }).join("");
+    }
+    static renderColumn(name, issues, path, storyField) {
+        const initialValue = 0;
+        const pointCount = issues.reduce((prev, current) => {
+            return prev + current?.fields[storyField];
+        }, initialValue);
+        return /* html */ `
+            <section class="column">
+                <h2>${name} : (${pointCount} pts)</h2>
+                ${issues.map((issue) => (this.renderIssue(issue, path, storyField))).join("")}
+            </section>`
+    }
+    static onLoad() {
+        // do nothing
+    }
+    static unLoad() {
+        // nothing
     }
 };
 

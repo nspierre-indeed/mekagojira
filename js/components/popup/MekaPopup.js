@@ -1,6 +1,6 @@
 import MekaPonent from '../MekaPonent.js';
 
-class MekaPopup  extends MekaPonent {
+class MekaPopup extends MekaPonent {
   static get observedAttributes() {
     return ['loading'];
   }

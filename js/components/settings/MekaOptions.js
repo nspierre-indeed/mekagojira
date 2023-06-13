@@ -50,7 +50,6 @@ class MekaOptions extends MekaPonent {
         <meka-option option="jiraPath"></meka-option>
         <meka-option option="refreshInterval"></meka-option>
         <meka-option option="popupQuery"></meka-option>
-        <meka-option option="savedFilters"></meka-option>
         <!-- the filters one and agile boards are complex, may need their own sub-component of meka-option -->
         <div class="formGroup">
           <label for="savedFilters">Saved Filters</label>

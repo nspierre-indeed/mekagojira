@@ -29,11 +29,22 @@ class MekaTasks extends MekaPonent {
                 color: #eaeaea;
             }
         }
+        li {
+          margin: 4px 0;
+          padding: 3px;
+        }
+        ul {
+          padding:0;
+          margin:0;
+          list-style-type: none;
+        }
         </style>
         <h3>Tasks</h3>
-        ${tasks.map(task => `<a target="_blank" href="${jiraPath}/browse/${task.key}">
-          ${task.key} - ${task.fields.summary}</a><br>
-        `).join('')}
+        <ul>
+          ${tasks.map(task => `<li><a target="_blank" href="${jiraPath}/browse/${task.key}">
+            ${task.key} - ${task.fields.summary}</a></li>
+          `).join('')}
+        </ul>
       `;
     });
   }

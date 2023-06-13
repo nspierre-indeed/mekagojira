@@ -93,7 +93,7 @@ class MekaOption extends MekaPonent {
                 <em>(in minutes, from 0.1 to 60)</em>
             `,
             savedFilters: /* html */`
-                <meka-option-filters filters="${this.getAttribute('value')}"></meka-option-filters>
+                <meka-option-filters filters=""></meka-option-filters>
             `,
             jiraPath: /* html */`
                 <label for="jiraPath">Jira Path</label>

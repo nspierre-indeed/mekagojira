@@ -15,7 +15,9 @@ class MekaVisualizer extends MekaPonent {
         this.boardName = Utils.params().name;
         this.variant = "standard";
         this.variantClass = VisualizerVariant;
-        this.render();
+        this.render().catch((error) => {
+            console.error('Error rendering: ', error);
+        });
     }
     async getStoryPointField() {
         const path = await this.getSetting('jiraPath');
@@ -45,18 +47,20 @@ class MekaVisualizer extends MekaPonent {
             </nav>
             <meka-loader variant="${this.variant}"></meka-loader>
             <section class="columns">
-              ${this.renderSprintDetails()}
+              ${this.variantClass.renderSprintDetails(this.sprintData, this.path, this.storyField)}
             </section>
         `;
         this.wrapper.innerHTML = this.template;
         await this.bindUpdates();
     }
     async bindUpdates() {
-        this.query('meka-visualizer-variants').addEventListener('updateVariant', (event) => {
+        this.query('meka-visualizer-variants').addEventListener('updateVariant', async (event) => {
             this.variant = event.target.getAttribute('variant');
             this.variantClass = variantsMap.get(this.variant) || VisualizerVariant;
+            this.variantClass.unLoad();
+            this.variantClass.onLoad(this.shadowRoot);
             if (this.sprint) {
-                this.reload();
+                await this.reload();
             }
         });
         this.query('meka-visualizer-sprints').addEventListener('updateSprint', async (event) => {
@@ -97,25 +101,8 @@ class MekaVisualizer extends MekaPonent {
         const sprintData = await fetch(`${path}/rest/agile/1.0/sprint/${this.sprint}/issue`);
         return JSON.parse(await sprintData.text());
     }
-    renderSprintDetails() {
-        if (!this.sprintData) {
-            return '';
-        } else {
-            return this.renderColumns(Object.entries(this.sprintData))
-        }
-    }
-    renderColumns(columns) {
-        return columns.map(([columnName, issues]) => {
-            return this.renderColumn(columnName, issues);
-        }).join("");
-    }
-    renderColumn(name, issues) {
-        return /* html */ `
-            <section class="column">
-                <h2>${name}</h2>
-                ${issues.map((issue) => (this.variantClass.renderIssue(issue, this.path, this.storyField))).join("")}
-            </section>`
-    }
+
+
 }
 
 export default MekaVisualizer;
