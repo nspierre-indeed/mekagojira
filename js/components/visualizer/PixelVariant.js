@@ -3,6 +3,7 @@ import VisualizerVariant from './VisualizerVariant.js';
 const pattern = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let current = 0;
 let variantShadowDom = null;
+let animationId;
 
 class PixelVariant extends VisualizerVariant {
     static getStyles() {
@@ -11,6 +12,8 @@ class PixelVariant extends VisualizerVariant {
                 .mainWrapper {
                     font-family:Pixel;
                     background: url('img/pixel_bg.webp') fixed bottom repeat-x rgba(171, 146, 204);
+                    overflow: hidden;
+                    position: relative;
                 }
 
                 .column {
@@ -150,7 +153,6 @@ class PixelVariant extends VisualizerVariant {
                     border: solid 2px #fff;
                     z-index:1;
                     animation: loadup linear 1.5s;
-                    transition: background-color 0.2s;
                 }
                 .missileTower.closest {
                     background-color: #aeaeae;
@@ -158,6 +160,29 @@ class PixelVariant extends VisualizerVariant {
                 .missileTower.fired {
                     background-color: #f00;
                     transition: background-color 0.2s;
+                }
+                .missile {
+                    width: 0; 
+                    height: 0; 
+                    border-left: 10px solid transparent;
+                    border-right: 10px solid transparent;
+                    border-bottom: 10px solid;
+                    position:absolute;
+                }
+                .friendlyMissile {
+                    border-bottom-color: #fff;
+                }
+                .enemyMissile {
+                    border-bottom-color: rgba(200, 0, 0);
+                }
+                .trail {
+                    background: linear-gradient(rgba(255,255,255,1), rgba(0,0,0,0));
+                    display:block;
+                    position:absolute;
+                    width:2px;
+                }
+                .enemyMissile .trail {
+                    background: linear-gradient(rgba(200,0,0,1), rgba(200,0,0,0));
                 }
                 @keyframes loadup {
                     from {
@@ -228,9 +253,11 @@ class PixelVariant extends VisualizerVariant {
         variantShadowDom = null;
         document.removeEventListener('keydown', this.keyHandler);
     }
+    // TODO: put these all in a helper class or something
     static startGame() {
+        // make towers
         const columns = variantShadowDom.querySelectorAll('section.column');
-        let closest;
+        let closestTower;
         const makeTower = () => {
             const tower = document.createElement('div');
             tower.className = 'missileTower';
@@ -242,53 +269,205 @@ class PixelVariant extends VisualizerVariant {
             towers.push(tower);
             column.appendChild(tower);
         });
+        // make holders for missiles
+        const enemyMissiles = [];
+        const friendlyMissiles = [];
+        const makeMissile = (enemy = false) => {
+            const missile = document.createElement('div');
+            missile.classList.add('missile');
+            missile.classList.add((enemy) ? 'enemyMissile' : 'friendlyMissile');
+            const trail = document.createElement('div');
+            trail.classList.add('trail');
+            missile.appendChild(trail);
+            return missile;
+        };
+        const makeEnemyMissile = () => {
+            const enemyMissile = makeMissile(true);
+            const angle = randomIntFromInterval(100, 250);
+            enemyMissile.dataset.angle = angle;
+            enemyMissile.style.transform = `rotate(${angle}deg)`;
+            const randomLeft = randomIntFromInterval(30, window.innerWidth - 30);
+            enemyMissile.style.top = '20px';
+            enemyMissile.style.left = `${randomLeft}px`;
+            enemyMissile.dataset.origin = `0,${randomLeft}`;
+            variantShadowDom.appendChild(enemyMissile);
+            enemyMissiles.push(enemyMissile);
+        };
+        const randomIntFromInterval = (min, max) => { // min and max included 
+            return Math.floor(Math.random() * (max - min + 1) + min)
+        };
+        // functions to make math easier
+        // const mid_point = ([x1, y1], [x2, y2]) => [(x1 + x2) / 2, (y1 + y2) / 2];
+        const center = (target) => {
+            const rect = target.getBoundingClientRect();
+            return {
+                x: rect.left + rect.width / 2,
+                y: rect.top + rect.height / 2
+            };
+        };
+        const findNewPoint = (x, y, angle, distance) => {
+            const result = {};
+        
+            result.x = Math.cos((angle) * Math.PI / 180) * distance + x;
+            result.x = parseFloat(result.x).toFixed(2);
+            result.y = Math.sin((angle) * Math.PI / 180) * distance + y;
+            result.y = parseFloat(result.y).toFixed(2);
+            return result;
+        };
+        const getDistance = (x1, y1, x2, y2) => {
+            let y = x2 - x1;
+            let x = y2 - y1;
+            return Math.sqrt(x * x + y * y);
+        };
+        const checkCollision = (point) => {
+            const collisions = [];
+            enemyMissiles.forEach((enemyMissile, idx) => {
+                const targetX = enemyMissile.style.left;
+                const targetY = enemyMissile.style.top;
+                const distance = getDistance(
+                    parseFloat(point.x).toFixed(2),
+                    parseFloat(point.y).toFixed(2),
+                    parseFloat(targetX).toFixed(2),
+                    parseFloat(targetY).toFixed(2));
+
+                if (distance < 50) {
+                    collisions.push(idx);
+                }
+            });
+            return collisions;
+        };
+        // listeners
         document.addEventListener('mousemove', e => {
-            closest = towers[0];
+            closestTower = towers[0];
             towers.forEach((tower) => {
                 tower.classList.remove('closest');
-                const towerBoundingRect = tower.getBoundingClientRect();
-                const towerCenter = {
-                    x: towerBoundingRect.left + towerBoundingRect.width / 2,
-                    y: towerBoundingRect.top + towerBoundingRect.width / 2
+                const towerCenter = center(tower);
+                let distanceX = Math.abs(e.pageX - towerCenter.x);
+                if (distanceX < Math.abs(e.pageX - closestTower.getBoundingClientRect().x)) {
+                    closestTower = tower;
                 }
                 let angle = Math.atan2(e.pageX - towerCenter.x, - (e.pageY - towerCenter.y) )*(180 / Math.PI);
-                let distanceX = Math.abs(e.pageX - towerCenter.x);
-                if (distanceX < Math.abs(e.pageX - closest.getBoundingClientRect().x)) {
-                    closest = tower;
+                // convert to circle instead of negative
+                if (angle < 0) {
+                    angle = 360 + angle;
                 }
-                tower.style.transform = `rotate(${angle}deg)`;
-                tower.dataset.angle = angle;
+                tower.dataset.angle = parseFloat(angle).toFixed(2);
             });
-            closest.classList.add('closest');
+            // TODO: look into putting this inside the step function
+            window.requestAnimationFrame(() => {
+                closestTower.style.transform = `rotate(${closestTower.dataset.angle}deg)`;
+                closestTower.classList.add('closest');
+            });
         });
         document.addEventListener('mouseup', e => {
-            const target = closest;
+            const target = closestTower;
             if (target.classList.contains('fired')) {
                 return false;
             }
+            const towerCenter = center(target);
             target.classList.add('fired');
+            const missile = makeMissile();
+            variantShadowDom.appendChild(missile);
+            const offsetAngle = parseFloat(target.dataset.angle) + 90;
+            const newPoint = findNewPoint(towerCenter.x, towerCenter.y, offsetAngle, -50);
+            missile.style.left = `${newPoint.x - (missile.getBoundingClientRect().width / 2)}px`;
+            missile.style.top = `${newPoint.y - (missile.getBoundingClientRect().height / 2)}px`;
+            missile.dataset.angle = target.dataset.angle;
+            missile.dataset.origin = `${missile.style.left},${missile.style.top}`;
+            missile.style.transform = `rotate(${missile.dataset.angle}deg)`;
+            friendlyMissiles.push(missile);
+            // TODO: look into putting this inside the step function
             window.setTimeout(() => {
-                target.classList.remove('fired');
+                window.requestAnimationFrame(() => {
+                    target.classList.remove('fired');
+                });
             }, 1000);
         });
+        let now = Date.now();
+        let then = now;
+        let elapsed = 0;
+        const speed = 10;
+        const enemySpawnSpeed = 5000;
+        let lastSpawn = 5000;
+        const step = () => {
+            then = now;
+            now = Date.now();
+            elapsed = now - then;
+            if (lastSpawn < 1) {
+                makeEnemyMissile();
+                lastSpawn = enemySpawnSpeed;
+            } else {
+                lastSpawn -= elapsed;
+            }
+            
+            const moveDistance = (elapsed * speed) / 33.3; // 5 frames per 33.3 milliseconds
+            enemyMissiles.forEach((missile, index) => {
+                const origin = missile.dataset.origin.split(',');
+                const [ originX, originY ] = origin;
+                const oldPoint = {
+                    x: parseFloat(missile.style.left),
+                    y: parseFloat(missile.style.top)
+                };
+                if (oldPoint.y > window.innerHeight || oldPoint.x < 1 || oldPoint.x > window.innerWidth - 30) {
+                    enemyMissiles.splice(index, 1);
+                    variantShadowDom.removeChild(missile);
+                    return;
+                }
+                const offsetAngle = parseFloat(missile.dataset.angle) + 90;
+                const newPoint = findNewPoint(oldPoint.x, oldPoint.y, offsetAngle, -1 * (moveDistance / 2 ));
+                missile.style.left = `${newPoint.x}px`;
+                missile.style.top = `${newPoint.y}px`;
+                const trailLength = getDistance(parseFloat(originX), parseFloat(originY).toFixed(2), newPoint.x, newPoint.y);
+                const trail = missile.querySelector('.trail');
+                trail.style.height = `${trailLength+10}px`;
+            });
+            friendlyMissiles.forEach((missile, index) => {
+                const origin = missile.dataset.origin.split(',');
+                const [ originX, originY ] = origin;
+                const oldPoint = {
+                    x: parseFloat(missile.style.left),
+                    y: parseFloat(missile.style.top)
+                };
+                const collisions = checkCollision(oldPoint);
+                if (collisions.length > 0) {
+                    collisions.forEach((index) => {
+                        const targetMissile = enemyMissiles[index];
+                        enemyMissiles.splice(index, 1);
+                        variantShadowDom.removeChild(targetMissile);
+                    });
+                }
+                if (collisions.length > 0 || oldPoint.y < 1 || oldPoint.x < 1 || oldPoint.x > window.innerWidth - 30) {
+                    friendlyMissiles.splice(index, 1);
+                    variantShadowDom.removeChild(missile);
+                    return;
+                }
+                const offsetAngle = parseFloat(missile.dataset.angle) + 90;
+                const newPoint = findNewPoint(oldPoint.x, oldPoint.y, offsetAngle, -1 * moveDistance);
+                missile.style.left = `${newPoint.x}px`;
+                missile.style.top = `${newPoint.y}px`;
+                const trailLength = getDistance(parseFloat(originX), parseFloat(originY).toFixed(2), newPoint.x, newPoint.y);
+                const trail = missile.querySelector('.trail');
+                trail.style.height = `${trailLength+10}px`;
+            });
+
+
+            animationId = window.requestAnimationFrame(step);
+        };
+        animationId = window.requestAnimationFrame(step);
     }
     static keyHandler(event) {
-
         // If the key isn't in the pattern, or isn't the current key in the pattern, reset
         if (pattern.indexOf(event.key) < 0 || event.key !== pattern[current]) {
             current = 0;
             return;
         }
-
         // Update how much of the pattern is complete
         current++;
-
         // If complete, alert and reset
         if (pattern.length === current) {
             current = 0;
             PixelVariant.startGame();
         }
-
     };
 }
 
