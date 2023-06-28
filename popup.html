@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Sprint Chrome Extension</title>
+        <script type="module" src="js/Mekagojira.js"></script>
+        <style>
+            /* Light mode */
+            @media (prefers-color-scheme: light) {
+                body {
+                    background-color: #eaeaea;
+                    color: #222;
+                }
+            }
+            /* Dark mode */
+            @media (prefers-color-scheme: dark) {
+                body {
+                    background-color: #333;
+                    color: #eaeaea;
+                }
+            }
+
+            body {
+                min-height:150px;
+                min-width:300px;
+                overflow:auto;
+                width:400px;
+            }
+        </style>
+    </head>
+    <body class="popup">
+        <meka-popup></meka-popup>
+    </body>
+</html>
