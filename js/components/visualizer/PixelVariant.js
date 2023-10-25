@@ -1,23 +1,71 @@
 import VisualizerVariant from './VisualizerVariant.js';
+import PixelCommand from './PixelCommand.js';
 
 const pattern = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let current = 0;
 let variantShadowDom = null;
+let animationId;
+let paused = false;
 
 class PixelVariant extends VisualizerVariant {
     static getStyles() {
         return /* html */`
             <style>
+                :host {
+                    overflow: hidden;
+                    position: relative;
+                }
                 .mainWrapper {
                     font-family:Pixel;
                     background: url('img/pixel_bg.webp') fixed bottom repeat-x rgba(171, 146, 204);
+                    overflow: hidden;
+                    position: relative;
                 }
-
+                .gameArea {
+                    pointer-events:none;
+                    position:absolute;
+                    top:0;
+                    left:0;
+                    right:0;
+                    bottom:0;
+                }
+                .scoreHolder {
+                    position: absolute;
+                    top: 200px;
+                    left: 50px;
+                    font-family:Pixel;
+                    border: solid 5px #FFF;
+                    padding: 20px;
+                    font-size: 24px;
+                    background: rgba(0,0,0,0.5);
+                    color: #fff;
+                    font-weight: bold;
+                    width: auto;
+                    animation: slide-in 2s;
+                    z-index:300;
+                }
+                .scoreHolder.gameOver {
+                    left: 50%;
+                    width: 400px;
+                    margin-left: -220px;
+                    transition: left 1s, width 1s;
+                }
                 .column {
                     background-color: #000;
                     color: #eaeaea;
                     position: relative;
                 }
+
+                .column.hit {
+                    background-color: rgba(200, 0, 0, 10);
+                    transition: background-color 2s;
+                    animation: shake 2s infinite alternate, drop 5s;
+                    position: relative;
+                }
+                .column.gone {
+                    opacity: 0;
+                }
+
                 nav {
                     z-index: 100;
                     position: relative;
@@ -124,6 +172,12 @@ class PixelVariant extends VisualizerVariant {
                     margin:0 2px;
                     display: inline-block;
                 }
+                .pips .half {
+                    height: 6px;
+                }
+                .points-half .pip {
+                    background: #efe;
+                }
                 .points-1 .pip {
                     background: #9f9;
                 }
@@ -150,7 +204,6 @@ class PixelVariant extends VisualizerVariant {
                     border: solid 2px #fff;
                     z-index:1;
                     animation: loadup linear 1.5s;
-                    transition: background-color 0.2s;
                 }
                 .missileTower.closest {
                     background-color: #aeaeae;
@@ -158,6 +211,39 @@ class PixelVariant extends VisualizerVariant {
                 .missileTower.fired {
                     background-color: #f00;
                     transition: background-color 0.2s;
+                }
+                .missile {
+                    width: 0; 
+                    height: 0; 
+                    border-left: 10px solid transparent;
+                    border-right: 10px solid transparent;
+                    border-bottom: 10px solid;
+                    position:absolute;
+                    transition: top 0.03s linear, left 0.03s linear;
+                }
+                .friendlyMissile {
+                    border-bottom-color: #fff;
+                }
+                .enemyMissile {
+                    border-bottom-color: rgba(200, 0, 0);
+                }
+                .trail {
+                    background: linear-gradient(rgba(255,255,255,1), rgba(0,0,0,0));
+                    display:block;
+                    position:absolute;
+                    width:2px;
+                }
+                .enemyMissile .trail {
+                    background: linear-gradient(rgba(200,0,0,1), rgba(200,0,0,0));
+                }
+                .explosion {
+                    width: 1px;
+                    height: 1px;
+                    animation: explode 2s;
+                    background: #fff;
+                    border-radius: 50%;
+                    position: absolute;
+                    opacity: 1;
                 }
                 @keyframes loadup {
                     from {
@@ -167,6 +253,65 @@ class PixelVariant extends VisualizerVariant {
                     to {
                         top: -100px;
                         height: 70px;
+                    }
+                }
+                @keyframes explode {
+                    from: {
+                        width: 1px;
+                        height: 1px;
+                        margin-left: 0;
+                        margin-top: 0;
+                        opacity: 1;
+                        background-color: red;
+                    }
+                    to {
+                        width: 100px;
+                        height: 100px;
+                        margin-left: -50px;
+                        margin-top: -50px;
+                        opacity: 0;
+                        background-color: yellow;
+                    }
+                }
+                @keyframes shake {
+                    0% {
+                        left: -20px;
+                    }
+                    22% {
+                        left: 10px;
+                    }
+                    45% {
+                        left: -10px;
+                    }
+                    64% {
+                        left: 23px;
+                    }
+                    89% {
+                        left: -5px;
+                    }
+                    99% {
+                        left: 0;
+                    }
+                }
+                @keyframes drop {
+                    0% {
+                        bottom: 0;
+                    }
+                    80% {
+                        opacity: 1;
+                    }
+                    100% {
+                        opacity: 0;
+                        bottom: -500px;
+                    }
+                }
+                @keyframes slide-in {
+                    0% {
+                        left: -300px;
+                    }
+
+                    100% {
+                        left: 50px;
                     }
                 }
                 
@@ -179,7 +324,7 @@ class PixelVariant extends VisualizerVariant {
         return /* html */ `
             <div class="issue">
                 <a href="${path}/browse/${issue.key}" target="_blank">
-                    <img class="avatar" src="${issue.fields.assignee.avatarUrls['24x24']}" />${issue.key} ${pips}
+                    <img class="avatar" src="${issue?.fields?.assignee?.avatarUrls['24x24']}" />${issue.key} ${pips}
                 </a>
             </div>
         `;
@@ -187,11 +332,15 @@ class PixelVariant extends VisualizerVariant {
     static renderPips(points) {
         let countDown = points;
         let pipText = '';
-        while (countDown--) {
-            pipText += `<div class="pip"></div>`;
+        if (countDown % 1) { // remainder, must be non-integer, only one we allow is 0.5
+            pipText += `<div class="half pip"></div>`;
+        } else {
+            while (countDown--) {
+                pipText += `<div class="pip"></div>`;
+            }
         }
         return /* html */ `
-            <div class="pips points-${points}">
+            <div class="pips points-${(points % 1) ? 'half' : points}">
                 ${pipText}
             </div>
         `;
@@ -228,67 +377,22 @@ class PixelVariant extends VisualizerVariant {
         variantShadowDom = null;
         document.removeEventListener('keydown', this.keyHandler);
     }
-    static startGame() {
-        const columns = variantShadowDom.querySelectorAll('section.column');
-        let closest;
-        const makeTower = () => {
-            const tower = document.createElement('div');
-            tower.className = 'missileTower';
-            return tower;
-        }
-        const towers = [];
-        columns.forEach((column) => {
-            const tower = makeTower();
-            towers.push(tower);
-            column.appendChild(tower);
-        });
-        document.addEventListener('mousemove', e => {
-            closest = towers[0];
-            towers.forEach((tower) => {
-                tower.classList.remove('closest');
-                const towerBoundingRect = tower.getBoundingClientRect();
-                const towerCenter = {
-                    x: towerBoundingRect.left + towerBoundingRect.width / 2,
-                    y: towerBoundingRect.top + towerBoundingRect.width / 2
-                }
-                let angle = Math.atan2(e.pageX - towerCenter.x, - (e.pageY - towerCenter.y) )*(180 / Math.PI);
-                let distanceX = Math.abs(e.pageX - towerCenter.x);
-                if (distanceX < Math.abs(e.pageX - closest.getBoundingClientRect().x)) {
-                    closest = tower;
-                }
-                tower.style.transform = `rotate(${angle}deg)`;
-                tower.dataset.angle = angle;
-            });
-            closest.classList.add('closest');
-        });
-        document.addEventListener('mouseup', e => {
-            const target = closest;
-            if (target.classList.contains('fired')) {
-                return false;
-            }
-            target.classList.add('fired');
-            window.setTimeout(() => {
-                target.classList.remove('fired');
-            }, 1000);
-        });
-    }
     static keyHandler(event) {
-
+        if (event.code === "Space") {
+            paused = !paused;
+        }
         // If the key isn't in the pattern, or isn't the current key in the pattern, reset
         if (pattern.indexOf(event.key) < 0 || event.key !== pattern[current]) {
             current = 0;
             return;
         }
-
         // Update how much of the pattern is complete
         current++;
-
         // If complete, alert and reset
         if (pattern.length === current) {
             current = 0;
-            PixelVariant.startGame();
+            PixelCommand.startGame(variantShadowDom, paused, animationId);
         }
-
     };
 }
 
