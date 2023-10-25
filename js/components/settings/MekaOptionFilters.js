@@ -8,7 +8,7 @@ class MekaOptionFilters extends MekaPonent {
     render() {
         const template = /* html */ `
         <div class="formGroup">
-             <label for="savedFilters">Saved Filters</label>
+             <label for="savedFilters">Favorite Filters</label>
              <input list="filters" id="savedFilters" placeholder="Pick Filter or leave blank" class="userInput">
              <datalist id="filters">
                <option value="">- - -</option>

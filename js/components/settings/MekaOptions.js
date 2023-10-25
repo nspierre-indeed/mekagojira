@@ -52,7 +52,7 @@ class MekaOptions extends MekaPonent {
         <meka-option option="popupQuery"></meka-option>
         <!-- the filters one and agile boards are complex, may need their own sub-component of meka-option -->
         <div class="formGroup">
-          <label for="savedFilters">Saved Filters</label>
+          <label for="savedFilters">Favorite Filters</label>
           <input list="filters" id="savedFilters" placeholder="Pick Filter or leave blank">
           <datalist id="filters">
           </datalist>
