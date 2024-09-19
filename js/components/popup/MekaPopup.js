@@ -101,6 +101,14 @@ class MekaPopup extends MekaPonent {
         super.query('meka-boards').boards = savedBoards;
       }
     });
+
+    chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
+      const { operation, data } = message;
+      if (operation === 'returnData') {
+        me.updateData(data.displayData);
+      }
+      return true;
+    });
   }
 }
 

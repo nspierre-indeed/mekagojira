@@ -39,6 +39,7 @@ const handleFetch = async (data) => {
     try {
         const displayData = await fetchData(path);
         chrome.storage.local.set({ displayData });
+        chrome.runtime.sendMessage({operation: 'returnData', data: { displayData }});
         chrome.storage.sync.set({ errorMessage: ''});
     } catch (e) {
         if (e.message === "401") {
