@@ -2,7 +2,7 @@
 
 ![MekaGojira](/img/repo.jpg)
 
-Proudly artisanally crafted in small batches using pure VanillaJS (not extract).
+Proudly crafted in small batches using pure VanillaJS (not extract).
 
 ## How to use
 
@@ -10,14 +10,14 @@ Proudly artisanally crafted in small batches using pure VanillaJS (not extract).
 2. Click the chrome options item, then go to more tools -> extensions.
 3. Activate 'developer mode' on the top right.
 4. Click 'load unpacked' and navigate to the root directory of this repo.
-5. You'll need to configure the URL to your jira instance, and make some other basic choices. This options menu should pop up on its own. If it does not, pick "configure" from the extension popup, or right click the icon and click "options."
+5. You'll need to configure the URL to your jira instance, and make some other basic choices. This options menu should pop up on its own. If it does not, pick "configure" from the extension popup, or right-click the icon and click "options."
 6. OBSERVE THE MAGIC
 
 ## How to dev
 
 See steps 1-5 above (ESPECIALLY the one about magic).
 
-All of the source code lives in `./src` and is not compiled or pre-processed. 
+All the source code lives in `./src` and is not compiled or pre-processed. 
 
 ### Arch overview
 
@@ -44,4 +44,4 @@ All of the source code lives in `./src` and is not compiled or pre-processed.
 This is an architecture based on the chrome implementation of web components. The base component is `src/MekaPonent.js`. Note that it `extends` from `HTMLComponent`, and makes use of the shadow DOM to render its view. In order to make the es6 imports work across source files, we have to make sure to include the various javascript files as `type="module"` whenever the script tag is used to invoke them. 
 
 ### Why?
-Well, the main goal was to make something that did not require any understanding of a specific framework, and be as agnostic and unopinionated about how to build something equivalent to a reactive MVC pattern. Because I built it as a chrome extension, we can utilize the chrome verions of things directly and not worry about compatability. Also, because it's only served locally, we're not worried about minifying or obfuscating any of the code, so it makes sense to use something that approaches basic javascript functionality (with some helper functions built in to the base classes)
+Well, the main goal was to make something that did not require any understanding of a specific framework, and be as agnostic and unopinionated about how to build something equivalent to a reactive MVC pattern. Because I built it as a Chrome extension, we can utilize the chrome versions of things directly and not worry about compatability. Also, because it's only served locally, we're not worried about minifying or obfuscating any of the code, so it makes sense to use something that approaches basic javascript functionality (with some helper functions built in to the base classes)
