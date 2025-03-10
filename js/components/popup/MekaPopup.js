@@ -15,11 +15,7 @@ class MekaPopup extends MekaPonent {
     }
   }
   attributeChangedCallback(_name, _oldValue, _newValue) {
-    if (this.loading) {
-      super.query('meka-loader').done = false;
-    } else {
-      super.query('meka-loader').done = true;
-    }
+    super.query('meka-loader').done = !this.loading;
   }
   constructor() {
     super();
@@ -27,7 +23,7 @@ class MekaPopup extends MekaPonent {
     me.loading = true;
     me.defaultQuery = 'assignee%3DCurrentUser()%20and%20resolution%20=%20Unresolved';
     const wrapper = document.createElement('div');
-    const template = /* html */`
+    wrapper.innerHTML = `
       <style>
         :host {
           font-family:"Segoe UI", Roboto, sans-serif;
@@ -50,7 +46,6 @@ class MekaPopup extends MekaPonent {
       </article>
       <meka-nav></meka-nav>
     `;
-    wrapper.innerHTML = template;
     me.shadowRoot.appendChild(wrapper);
     me.init();
   }
