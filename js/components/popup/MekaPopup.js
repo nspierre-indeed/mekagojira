@@ -40,8 +40,8 @@ class MekaPopup extends MekaPonent {
       
       <article>
         <meka-loader></meka-loader>
-        <meka-tasks></meka-tasks>
         <meka-boards></meka-boards>
+        <meka-tasks></meka-tasks>
         <meka-error></meka-error>
       </article>
       <meka-nav></meka-nav>
