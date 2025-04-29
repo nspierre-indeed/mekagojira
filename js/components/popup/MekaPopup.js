@@ -1,6 +1,6 @@
-import MekaPonent from './MekaPonent.js';
+import MekaPonent from '../MekaPonent.js';
 
-class MekaView  extends MekaPonent {
+class MekaPopup extends MekaPonent {
   static get observedAttributes() {
     return ['loading'];
   }
@@ -15,11 +15,7 @@ class MekaView  extends MekaPonent {
     }
   }
   attributeChangedCallback(_name, _oldValue, _newValue) {
-    if (this.loading) {
-      super.query('meka-loader').done = false;
-    } else {
-      super.query('meka-loader').done = true;
-    }
+    super.query('meka-loader').done = !this.loading;
   }
   constructor() {
     super();
@@ -27,7 +23,7 @@ class MekaView  extends MekaPonent {
     me.loading = true;
     me.defaultQuery = 'assignee%3DCurrentUser()%20and%20resolution%20=%20Unresolved';
     const wrapper = document.createElement('div');
-    const template = /* html */`
+    wrapper.innerHTML = `
       <style>
         :host {
           font-family:"Segoe UI", Roboto, sans-serif;
@@ -38,18 +34,18 @@ class MekaView  extends MekaPonent {
         }
         article {
           z-index:10;
-          padding:5px;
+          padding:5px 5px 20px 5px;
         }
       </style>
       
       <article>
         <meka-loader></meka-loader>
-        <meka-tasks></meka-tasks>
         <meka-boards></meka-boards>
+        <meka-tasks></meka-tasks>
+        <meka-error></meka-error>
       </article>
       <meka-nav></meka-nav>
     `;
-    wrapper.innerHTML = template;
     me.shadowRoot.appendChild(wrapper);
     me.init();
   }
@@ -100,7 +96,15 @@ class MekaView  extends MekaPonent {
         super.query('meka-boards').boards = savedBoards;
       }
     });
+
+    chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => {
+      const { operation, data } = message;
+      if (operation === 'returnData') {
+        me.updateData(data.displayData);
+      }
+      return true;
+    });
   }
 }
 
-export default MekaView;
+export default MekaPopup;
