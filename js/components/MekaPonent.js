@@ -1,7 +1,7 @@
 class MekaPonent extends HTMLElement {
     constructor() {
         super();
-        const shadow = this.attachShadow({ mode: 'open'});
+        this.shadow = this.attachShadow({ mode: 'open'});
     }
     async getSetting(settingName, defaultSettingValue = null) {
         const fetchObj = {};
