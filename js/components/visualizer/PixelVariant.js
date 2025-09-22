@@ -324,7 +324,7 @@ class PixelVariant extends VisualizerVariant {
         return /* html */ `
             <div class="issue">
                 <a href="${path}/browse/${issue.key}" target="_blank">
-                    <img class="avatar" src="${issue?.fields?.assignee?.avatarUrls['24x24']}" />${issue.key} ${pips}
+                    <img class="avatar" src="${issue?.fields?.assignee?.avatarUrls?.['48x48'] || "img/unassigned.png"}" />${issue.key} ${pips}
                 </a>
             </div>
         `;

@@ -35,7 +35,7 @@ chrome.runtime.onMessage.addListener(async (message, _sender, _sendResponse) => 
 
 const handleFetch = async (data) => {
     const { jiraPath, popupQuery } = data;
-    const path = `${jiraPath}/rest/api/latest/search?jql=${popupQuery}`;
+    const path = `${jiraPath}/rest/api/3/search/jql/?jql=${popupQuery}&fields=summary,key`;
     try {
         const displayData = await fetchData(path);
         chrome.storage.local.set({ displayData });
@@ -65,12 +65,14 @@ const fetchData = async (path) => {
     chrome.action.setBadgeText({text: '...'});
     const response = await fetch(path);
     if (response.status !== 200) {
+        console.warn('fetch error', response);
         chrome.action.setBadgeBackgroundColor({ color: 'rgb(243,133,172)' });
         chrome.action.setBadgeText({text: '!'});
         isFetching = false;
         throw new Error(response.status.toString());
     }
     const responseText = await (response.text());
+    console.warn(responseText);
     isFetching = false;
     const parsedText = JSON.parse(responseText);
     const text = parsedText?.issues?.length.toString();

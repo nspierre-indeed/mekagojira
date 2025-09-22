@@ -142,7 +142,7 @@ class VisualizerVariant {
         return /* html */ `
         <div class="issue">
             <a href="${path}/browse/${issue.key}" target="_blank">
-                <img class="avatar" src="${issue.fields.assignee.avatarUrls['48x48']}" />
+                <img class="avatar" src="${issue?.fields?.assignee?.avatarUrls?.['48x48'] || "img/unassigned.png"}" />
                 <span>
                 <h4>${issue.key}</h4>
                 <p>${storyPoints} pts</p>
